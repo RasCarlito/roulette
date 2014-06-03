@@ -1,0 +1,9 @@
+{
+  "name": "Roul3tte!!",
+  "description": "Shit is going on woooow \\o/",
+  "version": "0.0.1",
+  "dependencies": {
+    "express": "~4.4.1",
+    "socket.io": "~1.0.4"
+  }
+}
