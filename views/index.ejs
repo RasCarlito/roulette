@@ -4,7 +4,8 @@
 	<title><%= title %></title>
 
 	<link href='http://fonts.googleapis.com/css?family=Lobster' rel='stylesheet' type='text/css'>
-	<link rel='stylesheet' href='/stylesheets/style.css' />
+	
+	<link rel='stylesheet' href='/core/css/df.core.css' />
 </head>
 <body>
 	<div class="main header">
@@ -14,5 +15,16 @@
 		<p>Welcome to <%= title %>!</p>
 		<%= settings.test %>
 	</div>
+
+	<!-- JS Libs -->
+	<script type="text/javascript" src="/libs/jquery/js/jquery-2.1.1.min.js"></script>
+	<script type="text/javascript" src="/libs/dust/js/dust-core.min.js"></script>
+	<script type="text/javascript" src="/libs/moment/js/moment.min.js"></script>
+	<script type="text/javascript" src="/libs/backbone/js/underscore-min.js"></script>
+	<script type="text/javascript" src="/libs/backbone/js/backbone-min.js"></script>
+	<script type="text/javascript" src="/libs/backbone/js/backbone.marionette.min.js"></script>
+
+	<!-- Core -->
+	<script type="text/javascript" src="/core/js/df.core.js"></script>
 </body>
 </html>
