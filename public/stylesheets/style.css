@@ -1,8 +1,63 @@
-body {
-  padding: 50px;
-  font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+/**
+ * General html definitions
+ */
+
+html, body {
+	font: 14px "Lucida Grande", Helvetica, Arial, sans-serif;
+	width: 100%;
+	height: 100%;
+	background: #1d1d1d;
+	padding: 0;
+	margin: 0;
+	color: #ccc;
 }
 
 a {
-  color: #00B7FF;
+	color: #ccc;
+	text-decoration: underline;
+}
+
+
+/**
+ * General classes
+ */
+
+.header {
+	background: #303030;
+	color: #80bd01;
+	font-family: "Lobster", cursive;
+}
+
+.content {
+	color: #ccc;
+}
+
+
+
+/**
+ * Main header definitions
+ */
+
+.main.header {
+	width: 100%;
+	height: 50px;
+	position: fixed;
+	top: 0;
+	left: 0;
+}
+
+.main.header h1 {
+	margin: 0;
+	padding: 0 15px;
+	line-height: 50px;
+}
+
+
+
+/**
+ * Main content definitions
+ */
+
+.main.content {
+	padding: 70px 15px;
 }
