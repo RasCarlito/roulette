@@ -51,9 +51,9 @@ module.exports = function(grunt) {
 				// them into one file in the static/build/dust folder
 				"files": [{
 					"expand": true,
-					"cwd": "static",
+					"cwd": "public",
 					"src": ["**/*.dust"],
-					"dest": "static/build/dust",
+					"dest": "public/build/dust",
 					"ext": ".dust.js",
 					"flatten": true
 				}],

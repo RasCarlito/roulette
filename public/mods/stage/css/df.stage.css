@@ -1,0 +1,11 @@
+.stage .controls button {
+
+}
+
+.stage .controls button.start {
+
+}
+
+.stage .controls button.stop {
+	display: none;
+}

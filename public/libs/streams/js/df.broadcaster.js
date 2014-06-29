@@ -1,3 +1,4 @@
+/** @namespace */
 (function(window, $, undefined) {
 	"use strict";
 
@@ -5,8 +6,12 @@
 	var _ = window._,
 		DF = window.DF,
 		Backbone = window.Backbone,
-		Marionette = Backbone.Marionette;
+		Marionette = Backbone.Marionette,
+		URL = window.URL;
 
+
+	// Cross browser getUserMedia
+	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 
 	/**
@@ -27,9 +32,9 @@
 		 *
 		 * @type {Layout}
 		 */
-		var Broadcaster_layout = Backbone.Marionette.Layout.extend({
+		var Broadcaster_layout = Marionette.LayoutView.extend({
 			// Dust template definition
-			"template": "df.broadcaster",
+			"template": "df.streams.broadcaster",
 
 			// Declare the layout regions
 			"regions": {}
@@ -45,6 +50,7 @@
 		 * @param {object} options  Override default options
 		 *
 		 * @public
+		 * @constructor
 		 */
 		var Broadcaster = function(options) {
 			return new Broadcaster.fn.init(options);
@@ -215,6 +221,8 @@
 			 * @return {Broadcaster} Returns itself for chained calls or false if params are missing
 			 */
 			"start": function(options) {
+				DF.log("[DF.Libs.Broadcaster.start] Received stream object", DF.log.DEBUG);
+
 				// Define default options for starting the camera
 				// Parameters can define init configuration,
 				// a connect flag and success/error callbacks for the server connection
@@ -230,17 +238,25 @@
 				// Extend default options with given ones
 				options = _.extend(default_options, options);
 
-				if (options.connect) {
-					// Display loading message
-					this.loading(true);
+				navigator.getUserMedia({
+					audio: true,
+					video: true
+				}, function(stream) {
+					DF.log("[DF.Libs.Broadcaster.start] Received stream object", DF.log.DEBUG);
 
+					self.stream = stream;
 
-				} else {
-					// Mark the video state as started
-					self.state.started = true;
+					var video = $("video")[0];
+					if (URL) {
+						video.src = URL.createObjectURL(stream);
+					} else {
+						video.src = stream;
+					}
 
-
-				}
+					video.onloadedmetadata = function() {
+						DF.log("[DF.Libs.Broadcaster.start] Loaded meta data for local stream feed", DF.log.DEBUG);
+					};
+				}, options.error);
 
 				return this;
 			},
@@ -253,10 +269,9 @@
 			 * @return {Broadcaster} Returns itself for chained calls
 			 */
 			"stop": function() {
-				// Mark the video state as not started
-				this.state.started = false;
 
-
+				$("video").attr("src", "");
+				this.stream.stop();
 
 				return this;
 			},

@@ -1,0 +1,8 @@
+{! Your dust template here !}
+<div class="stage">
+	<div class="controls">
+		<button class="start">Start capture</button>
+		<button class="stop">Stop capture</button>
+	</div>
+	<div class="broadcaster"></div>
+</div>

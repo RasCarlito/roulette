@@ -54,10 +54,8 @@
 
 			// Retrieve current date
 			var type_name = this.log.levels[level - 1] || "log",
-				date = new Date();
+				date = moment();
 
-			// @todo Transcribe into moment.js code
-			var date = moment();
 			msg = "[" + date.format("YYYY-MM-DD HH:mm") + "] [" + type_name.toUpperCase() + "] " + msg;
 
 			// Log message to available console
