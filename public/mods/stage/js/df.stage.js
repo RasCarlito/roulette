@@ -69,6 +69,8 @@
 			this.broadcaster = DF.Libs.Broadcaster({
 				region: this.layout.broadcaster_region
 			});
+
+			DF.vent.connect();
 		};
 
 		return Stage;
