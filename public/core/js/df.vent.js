@@ -161,6 +161,12 @@
 					DF.vent.trigger('node:disconnect');
 				});
 
+
+				this.socket.on("dispatch", function(offer) {
+					DF.log("[DF.vent:Node.socket.on(dispatch)] Received 'dispatch' event from socket.io server", DF.log.DEBUG);
+					DF.vent.trigger("node:dispatch", offer);
+				});
+
 				return this;
 			},
 

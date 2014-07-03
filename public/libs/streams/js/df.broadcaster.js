@@ -13,6 +13,9 @@
 	// Cross browser getUserMedia
 	navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
+	var PeerConnection = window.RTCPeerConnection || window.mozRTCPeerConnection || window.webkitRTCPeerConnection;
+	var SessionDescription = window.RTCSessionDescription || window.mozRTCSessionDescription || window.webkitRTCSessionDescription;
+
 
 	/**
 	 * Broadcaster class
@@ -60,80 +63,11 @@
 
 		// Prototype methods
 		Broadcaster.fn = Broadcaster.prototype = {
-			// Broadcaster states
-			"default_state": {
-				"loaded": false,
-				"connected": false, // is the broadcaster connected?
-				"authorized": false,
-				"started": false,
-
-				// Video states
-				"video": {
-					"active": true, // is the video active?
-					"quality": 'high', // what quality is the video sampled in
-					"ratio": "16:9", // The default ratio for the video
-					"capture_size": 180, // The default height for the 16:9 ratio
-
-					"changing_state": false, // @todo find if this is still useful
-
-					// Existing predefined video qualities
-					"qualities": {
-						"low": {
-							"quality": 40, // video quality 1-100
-							"fps": 15 // framerate 15/25
-						},
-						"medium": {
-							"quality": 70,
-							"fps": 20
-						},
-						"high": {
-							"quality": 90,
-							"fps": 25
-						}
-					}
-				},
-
-				// Audio states
-				"audio": {
-					"active": true, // is the audio active?
-					"quality": 'medium', // what quality is the audio sampled in
-
-					"gain": 75, // microphone gain
-
-					"loopback": false,
-
-					// Existing predefined audio qualities
-					"qualities": {
-						"low": 3,
-						"medium": 6,
-						"high": 9
-					}
-				}
-			},
-
 
 			// Default broadcaster options
 			"default_options": {
 				// Backbone.Marionette region where the broadcaster will be injected
-				"region": null,
-
-				// Automatically connect to video server after init
-				"connect": false,
-
-				// Path to image to display when the broadcaster is not connected
-				"img": '/static/images/stage/connexion.jpg',
-
-				// Override video settings on init
-				"video": {},
-
-				// Override audio settings on init
-				"audio": {},
-
-				// Size of the broadcaster container
-				"size": "small",
-
-				// Automatically display loading message on init
-				"loading": false,
+				"region": null
 			},
 
 
@@ -162,15 +96,8 @@
 					return;
 				}
 
-				// Register to events
-				this.register();
-
 				// Initialize broadcaster layouts
 				this.init_layouts();
-
-				if (this.options.loading) {
-					this.loading(true);
-				}
 			},
 
 
@@ -185,32 +112,10 @@
 
 				// Display the view in the given region
 				this.region.show(this.layout);
+
+				this.video = this.layout.$el.find("video")[0];
 			},
 
-
-			/**
-			 * Show/Hide a loading message in the middle of the webcam container
-			 *
-			 * @this {Subscriber}
-			 * @param  {Boolean} is_loading True to show the message, false to hide it (false by default)
-			 */
-			"loading": function(is_loading) {
-				// Ensure that the is_loading param is set
-				is_loading = is_loading || false;
-
-				// Show/Hide the loading message
-				this.layout.$el.find(".loading")[is_loading ? "show" : "hide"]();
-			},
-
-
-			/**
-			 * Register to events from the flash app internally
-			 */
-			"register": function() {
-				var self = this;
-
-
-			},
 
 
 			/**
@@ -221,7 +126,7 @@
 			 * @return {Broadcaster} Returns itself for chained calls or false if params are missing
 			 */
 			"start": function(options) {
-				DF.log("[DF.Libs.Broadcaster.start] Received stream object", DF.log.DEBUG);
+				DF.log("[DF.Libs.Broadcaster.start] Starting capture", DF.log.DEBUG);
 
 				// Define default options for starting the camera
 				// Parameters can define init configuration,
@@ -245,17 +150,35 @@
 					DF.log("[DF.Libs.Broadcaster.start] Received stream object", DF.log.DEBUG);
 
 					self.stream = stream;
+					self.video.src = URL.createObjectURL(stream);
 
-					var video = $("video")[0];
-					if (URL) {
-						video.src = URL.createObjectURL(stream);
-					} else {
-						video.src = stream;
-					}
+					var pc = new PeerConnection({
+						'iceServers': [{
+							'url': 'stun:stun.l.google.com:19302'
+						}]
+					}),
+						error = function() {
+							console.log("PC error");
+							pc.close();
+						};
 
-					video.onloadedmetadata = function() {
-						DF.log("[DF.Libs.Broadcaster.start] Loaded meta data for local stream feed", DF.log.DEBUG);
+					pc.onicecandidate = function(candidate) {
+						console.log("ice candidate: ", candidate);
 					};
+
+					pc.addStream(stream);
+
+					pc.createOffer(function(offer) {
+						pc.setLocalDescription(new SessionDescription(offer), function() {
+							console.log("Ready to emit connection offer: ", offer);
+
+							DF.vent.emit("dispatch", offer);
+						}, error);
+					}, error);
+
+					/*video.onloadedmetadata = function() {
+						DF.log("[DF.Libs.Broadcaster.start] Loaded meta data for local stream feed", DF.log.DEBUG);
+					};*/
 				}, options.error);
 
 				return this;
@@ -285,43 +208,6 @@
 			 */
 			"destroy": function() {
 				this.region.close();
-				return this;
-			},
-
-
-			/**
-			 * Set the microphone gain
-			 *
-			 * @param {Number} gain A value between 0 and 100
-			 * @return {mixed} Returns itself for chained calls or false if parameter type is wrong
-			 */
-			"set_gain": function(gain) {
-				if (!_.isNumber(gain)) {
-					DF.log("[DF.Libs.Broadcaster.set_gain] Wrong parameter type given, expected Number", DF.log.WARN);
-					return false;
-				}
-
-
-				return this;
-			},
-
-
-			/**
-			 * Mute the microphone
-			 */
-			"mute": function() {
-				this.state.audio.active = false;
-
-				return this;
-			},
-
-
-			/**
-			 * Unmute the microphone
-			 */
-			"unmute": function() {
-				this.state.audio.active = true;
-
 				return this;
 			}
 		};

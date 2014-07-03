@@ -55,10 +55,22 @@
 
 
 
+		var bind_events = _.bind(function() {
+			DF.vent.on("node:dispatch", function(offer) {
+				DF.log("[DF.Stage:on(dispatch)] Received offer: ", DF.log.DEBUG);
+				console.log(offer);
+			})
+		}, Stage);
+
+
+
+
 		Stage.init = function() {
 			DF.log("[DF.Stage.init] Initializing Stage module", DF.log.DEBUG);
 
 			var self = this;
+
+			bind_events();
 
 			this.layout = new Stage_layout({
 				"parent": this
